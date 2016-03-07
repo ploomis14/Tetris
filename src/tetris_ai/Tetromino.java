@@ -43,9 +43,9 @@ public class Tetromino implements Cloneable {
         startY = START_Y;
     }
 
-    public Tetromino(Type type, int orientation) {
+    public Tetromino(Type type) {
         this.type = type;
-        this.orientationIndex = orientation;
+        this.orientationIndex = getRandomOrientation();
         startX = START_X;
         startY = START_Y;
     }

@@ -19,7 +19,7 @@ import java.util.Queue;
 public class TetrisDriver extends Application {
 
     private static final int PIECE_PREDICTION = 1;
-    private static final double GAME_SPEED = 0.5;
+    private static final double GAME_SPEED = 0.75;
 
     private TetrisView tetrisView;
     private Statistics statistics;
@@ -27,13 +27,16 @@ public class TetrisDriver extends Application {
     private TetrisAI ai;
     private Queue<Move> currentMoves;
 
-    private boolean aiMode = false;
+    private boolean aiMode = true;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         tetrisView = new TetrisView();
         currentPiece = new Tetromino();
         ai = new TetrisAI(PIECE_PREDICTION);
+        if (aiMode) {
+            currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece);
+        }
         tetrisView.addPiece(currentPiece);
         statistics = new Statistics();
 
@@ -86,10 +89,12 @@ public class TetrisDriver extends Application {
                 int lines = tetrisView.clearLines();
                 statistics.update(lines);
                 currentPiece = new Tetromino();
-                try {
-                    currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece.clone());
-                } catch (CloneNotSupportedException e) {
-                    e.printStackTrace();
+                if (aiMode) {
+                    try {
+                        currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece.clone());
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                    }
                 }
             } else {
                 if (aiMode && currentMoves != null && !currentMoves.isEmpty()) {

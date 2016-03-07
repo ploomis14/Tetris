@@ -9,31 +9,28 @@ import java.util.Queue;
  */
 public class TetrisAI {
 
-    private int searchDepth;
+    private int lookAhead;
 
     public TetrisAI(int lookAhead) {
-        searchDepth = lookAhead;
+        this.lookAhead = lookAhead;
     }
 
     public Queue<Move> getMoveSequence(int[][] startState, Tetromino tetromino) {
-        TetrisNode node = bfs(new TetrisNode(tetromino, startState, 0));
+        TetrisNode node = greedySearch(new TetrisNode(tetromino, startState, 0));
         return node.getMoves();
     }
 
-    private TetrisNode backchain(TetrisNode n) {
-        if (n == null) return null;
-        TetrisNode current = n;
-        TetrisNode p = current.getParent();
-        while (p.getParent() != null) {
-            current = p;
-            p = p.getParent();
+    public TetrisNode greedySearch(TetrisNode startNode) {
+        double bestScore = Integer.MIN_VALUE;
+        TetrisNode localMax = null;
+        List<TetrisNode> successors = startNode.getSuccessors();
+        for (TetrisNode n : successors) {
+            if (n.getScore() > bestScore) {
+                bestScore = n.getScore();
+                localMax = n;
+            }
         }
-        return current;
-    }
-
-    public TetrisNode bfs(TetrisNode startNode) {
-        List<TetrisNode> nodes = startNode.getSuccessors();
-        return nodes.get(0);
+        return localMax;
     }
 
     private class TetrisNode {
@@ -41,6 +38,8 @@ public class TetrisAI {
         private TetrisNode parent;
 
         private int depth;
+
+        private double score;
 
         /*
             The move sequence that was performed to place the previous tetromino.
@@ -62,7 +61,8 @@ public class TetrisAI {
             this.state = state;
             this.tetromino = tetromino;
             this.depth = depth;
-            moves = new LinkedList<>();
+            this.score = computeScore();
+            this.moves = new LinkedList<>();
         }
 
         /**
@@ -75,32 +75,34 @@ public class TetrisAI {
             List<TetrisNode> successors = new LinkedList<>();
 
             for (int index = 0; index < tetromino.getOrientations().length; index++) {
-                tetromino.setCenterY(Tetromino.START_Y);
-                tetromino.setCenterX(Tetromino.START_X);
-
                 for (int x = 0; x < Grid.WIDTH; x++) {
-                    int numRotations = Math.abs(tetromino.getOrientationIndex() - index);
-                    tetromino.setOrientationIndex(index);
+                    try {
+                        Tetromino newPiece = tetromino.clone();
+                        newPiece.setOrientationIndex(index);
+                        newPiece.setCenterX(x);
 
-                    int dx = x - tetromino.getCenterX();
-                    tetromino.setCenterX(x);
-                    int[][] newState = new int[state.length][];
-                    for (int i = 0; i < state.length; i++) {
-                        newState[i] = state[i].clone();
+                        int[][] newState = new int[Grid.HEIGHT][Grid.WIDTH];
+                        for (int i = 0; i < Grid.HEIGHT; i++) {
+                            System.arraycopy(state[i], 0, newState[i], 0, Grid.WIDTH);
+                        }
+
+                        if (Grid.isLegalMove(newPiece, newState, new int[]{0, 0})) {
+                            Grid.dropPiece(newPiece, newState);
+                            int dx = newPiece.getCenterX() - tetromino.getCenterX();
+                            int dy = newPiece.getCenterY() - tetromino.getCenterY();
+                            int rotations = Math.abs(newPiece.getOrientationIndex() - tetromino.getOrientationIndex());
+
+                            for (Tetromino.Type type : Tetromino.Type.values()) {
+                                TetrisNode successor = new TetrisNode(new Tetromino(type), newState, depth + 1);
+                                successor.addRotations(rotations);
+                                successor.addHorizontalMoves(dx);
+                                successor.addVerticalMoves(dy);
+                                successors.add(successor);
+                            }
+                        }
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
                     }
-
-                    int y = tetromino.getCenterY();
-                    if (Grid.isLegalMove(tetromino, newState, new int[]{0, 0})) {
-                        Grid.dropPiece(tetromino, newState);
-                    }
-                    int dy = tetromino.getCenterY() - y;
-
-                    TetrisNode successor = new TetrisNode(tetromino, newState, depth + 1);
-                    successor.addHorizontalMoves(dx);
-                    successor.addVerticalMoves(dy);
-                    successor.addRotations(numRotations);
-
-                    successors.add(successor);
                 }
             }
             return successors;
@@ -135,17 +137,16 @@ public class TetrisAI {
             return moves;
         }
 
-        /**
-         * Get the average score of all the current state's successors.
-         * 
-         * @return the average score
-         */
-        public double getHeuristic() {
-            return 0;
+        public double getScore() {
+            return score;
         }
 
-        public double getScore() {
-            return 0;
+        private double computeScore() {
+            int height = Grid.getHeight(state);
+            int holes = Grid.getHoles(state);
+            int lines = Grid.getCompleteLines(state);
+
+            return lines - holes - height;
         }
 
         public void setParent(TetrisNode p) {

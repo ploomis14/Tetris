@@ -40,4 +40,47 @@ public final class Grid {
         }
         return true;
     }
+
+    public static int getHeight(int[][] state) {
+        int maxHeight = 0;
+        for (int c = 0; c < WIDTH; c++) {
+            int h = getColumnHeight(state, c);
+            if (h > maxHeight) maxHeight = h;
+        }
+        return maxHeight;
+    }
+
+    private static int getColumnHeight(int[][] state, int c) {
+        for (int r = 0; r < HEIGHT; r++) {
+            if (state[r][c] == 1) {
+                return HEIGHT - r;
+            }
+        }
+        return 0;
+    }
+
+    public static int getHoles(int[][] state) {
+        int holes = 0;
+        for (int r = 1; r < HEIGHT; r++) {
+            for (int c = 0; c < WIDTH; c++) {
+                if (state[r][c] == 0 && state[r - 1][c] == 1) holes++;
+            }
+        }
+        return holes;
+    }
+
+    public static int getCompleteLines(int[][] state) {
+        int l = 0;
+        for (int r = 0; r < HEIGHT; r++) {
+            boolean complete = true;
+            for (int c = 0; c < WIDTH; c++) {
+                if (state[r][c] == 0) {
+                    complete = false;
+                    break;
+                }
+            }
+            if (complete) l++;
+        }
+        return l;
+    }
 }
