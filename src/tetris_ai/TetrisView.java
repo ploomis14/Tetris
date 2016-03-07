@@ -10,8 +10,8 @@ import javafx.scene.shape.Rectangle;
 public class TetrisView extends Group {
 
     private static final int PIXELS_PER_TILE = 32;
-    private static final int GRID_WIDTH = 10;
-    private static final int GRID_HEIGHT = 21;
+    public static final int GRID_WIDTH = 10;
+    public static final int GRID_HEIGHT = 21;
 
     private Rectangle[][] tiles;
     private int[][] occupied;
@@ -31,6 +31,10 @@ public class TetrisView extends Group {
         }
     }
 
+    public int[][] getOccupiedGrid() {
+        return occupied;
+    }
+
     public int clearLines() {
         int linesCleared = 0;
         int r = GRID_HEIGHT - 1;
@@ -48,7 +52,7 @@ public class TetrisView extends Group {
 
     public boolean gameOver() {
         for (int c = 0; c < GRID_WIDTH; c++) {
-            if (occupied[1][c] == 1) {
+            if (occupied[0][c] == 1) {
                 return true;
             }
         }
@@ -97,7 +101,7 @@ public class TetrisView extends Group {
             for (int c = 0; c < Tetromino.WIDTH; c++) {
                 int x = piece.getX() + c;
                 int y = piece.getY() + r;
-                if (piece.getOrientation()[r][c] == 1 && isLegal(y, x)) {
+                if (piece.getOrientation()[r][c] == 1 && isLegal(y, x, occupied)) {
                     tiles[y][x].setFill(color);
                 }
             }
@@ -108,14 +112,14 @@ public class TetrisView extends Group {
         clearPiece(piece);
         int oldOrientation = piece.getOrientationIndex();
         piece.rotate();
-        if (!isLegal(piece, new int[]{0, 0})) {
+        if (!isLegal(piece, occupied, new int[]{0, 0})) {
             piece.setOrientationIndex(oldOrientation);
         }
         drawPiece(piece);
     }
 
     public void doMove(Tetromino piece, int[] move) {
-        if (isLegal(piece, move)) {
+        if (isLegal(piece, occupied, move)) {
             clearPiece(piece);
             piece.setCenterX(piece.getCenterX() + move[0]);
             piece.setCenterY(piece.getCenterY() + move[1]);
@@ -124,10 +128,14 @@ public class TetrisView extends Group {
     }
 
     public boolean isLegal(Tetromino piece, int[] move) {
+        return isLegal(piece, occupied, move);
+    }
+
+    public static boolean isLegal(Tetromino piece, int[][] state, int[] move) {
         for (int r = 0; r < Tetromino.HEIGHT; r++) {
             for (int c = 0; c < Tetromino.WIDTH; c++) {
                 if (piece.getOrientation()[r][c] == 1
-                        && !isLegal(piece.getY() + r + move[1], piece.getX() + c + move[0])) {
+                        && !isLegal(piece.getY() + r + move[1], piece.getX() + c + move[0], state)) {
                     return false;
                 }
             }
@@ -136,16 +144,27 @@ public class TetrisView extends Group {
     }
 
     public void placePiece(Tetromino piece) {
+        placePiece(piece, occupied);
+    }
+
+    public static void placePiece(Tetromino piece, int[][] state) {
         for (int r = 0; r < Tetromino.HEIGHT; r++) {
             for (int c = 0; c < Tetromino.WIDTH; c++) {
                 if (piece.getOrientation()[r][c] == 1) {
-                    occupied[piece.getY() + r][piece.getX() + c] = 1;
+                    state[piece.getY() + r][piece.getX() + c] = 1;
                 }
             }
         }
     }
 
-    private boolean isLegal(int r, int c) {
-        return r < GRID_HEIGHT && r >= 0 && c < GRID_WIDTH && c >= 0 && occupied[r][c] != 1;
+    public static void dropPiece(Tetromino tetromino, int[][] state) {
+        while(isLegal(tetromino, state, Move.DOWN.getValues())) {
+            tetromino.setCenterY(tetromino.getCenterY() + Move.DOWN.getDy());
+        }
+        placePiece(tetromino, state);
+    }
+
+    public static boolean isLegal(int r, int c, int[][] grid) {
+        return r < GRID_HEIGHT && r >= 0 && c < GRID_WIDTH && c >= 0 && grid[r][c] != 1;
     }
 }

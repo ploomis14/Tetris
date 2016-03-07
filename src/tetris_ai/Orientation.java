@@ -3,7 +3,7 @@ package tetris_ai;
 /**
  * @author Peter Loomis
  */
-public final class Orientations {
+public final class Orientation {
 
     public static final int[][][] I = new int[][][] {
             {

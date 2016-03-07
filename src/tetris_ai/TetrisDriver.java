@@ -14,24 +14,27 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.Queue;
+
 public class TetrisDriver extends Application {
 
-    private static final double GAME_SPEED = 1.0;
-
-    private static final int[] RIGHT_MOVE = new int[] {1, 0};
-    private static final int[] LEFT_MOVE = new int[] {-1, 0};
-    private static final int[] DOWN_MOVE = new int[] {0, 1};
+    private static final int PIECE_PREDICTION = 1;
+    private static final double GAME_SPEED = 0.5;
 
     private TetrisView tetrisView;
     private Statistics statistics;
     private Tetromino currentPiece;
+    private TetrisAI ai;
+    private Queue<Move> currentMoves;
+
+    private boolean aiMode = false;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         tetrisView = new TetrisView();
         currentPiece = new Tetromino();
+        ai = new TetrisAI(PIECE_PREDICTION);
         tetrisView.addPiece(currentPiece);
-
         statistics = new Statistics();
 
         HBox vb = new HBox();
@@ -46,14 +49,16 @@ public class TetrisDriver extends Application {
 
         // event listeners for manual commands
         scene.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
-            if (key.getCode() == KeyCode.RIGHT) {
-                tetrisView.doMove(currentPiece, RIGHT_MOVE);
-            } else if (key.getCode() == KeyCode.LEFT) {
-                tetrisView.doMove(currentPiece, LEFT_MOVE);
-            } else if (key.getCode() == KeyCode.UP) {
-                tetrisView.rotatePiece(currentPiece);
-            } else if (key.getCode() == KeyCode.DOWN) {
-                tetrisView.doMove(currentPiece, DOWN_MOVE);
+            if (!aiMode) {
+                if (key.getCode() == KeyCode.RIGHT) {
+                    tetrisView.doMove(currentPiece, Move.RIGHT.getValues());
+                } else if (key.getCode() == KeyCode.LEFT) {
+                    tetrisView.doMove(currentPiece, Move.LEFT.getValues());
+                } else if (key.getCode() == KeyCode.UP) {
+                    tetrisView.rotatePiece(currentPiece);
+                } else if (key.getCode() == KeyCode.DOWN) {
+                    tetrisView.doMove(currentPiece, Move.DOWN.getValues());
+                }
             }
         });
 
@@ -76,13 +81,19 @@ public class TetrisDriver extends Application {
         public void handle(ActionEvent event) {
             if (tetrisView.gameOver()) {
                 statistics.showEndgameMessage();
-            } else if (!tetrisView.isLegal(currentPiece, DOWN_MOVE)) {
+            } else if (!tetrisView.isLegal(currentPiece, Move.DOWN.getValues())) {
                 tetrisView.placePiece(currentPiece);
                 int lines = tetrisView.clearLines();
                 statistics.update(lines);
                 currentPiece = new Tetromino();
+                currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(),
+                        new Tetromino(currentPiece.getType(), currentPiece.getOrientationIndex()));
             } else {
-                tetrisView.doMove(currentPiece, DOWN_MOVE);
+                if (aiMode && currentMoves != null && !currentMoves.isEmpty()) {
+                    Move nextMove = currentMoves.remove();
+                    tetrisView.doMove(currentPiece, nextMove.getValues());
+                }
+                tetrisView.doMove(currentPiece, Move.DOWN.getValues());
             }
         }
     }

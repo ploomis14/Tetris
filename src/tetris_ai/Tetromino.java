@@ -13,8 +13,8 @@ public class Tetromino {
     public static final int HEIGHT = 4;
 
     // starting coordinates
-    private static final int START_X = 6;
-    private static final int START_Y = 0;
+    public static final int START_X = 4;
+    public static final int START_Y = 0;
 
     // rotation center
     private static final int CENTER_X = 2;
@@ -43,28 +43,39 @@ public class Tetromino {
         startY = START_Y;
     }
 
+    public Tetromino(Type type, int orientation) {
+        this.type = type;
+        this.orientationIndex = orientation;
+        startX = START_X;
+        startY = START_Y;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
     public int getCenterX() {
-        return startX;
+        return startX + CENTER_X;
     }
 
     public int getCenterY() {
-        return startY;
+        return startY + CENTER_Y;
     }
 
     public void setCenterX(int x) {
-        startX = x;
+        startX = x - CENTER_X;
     }
 
     public void setCenterY(int y) {
-        startY = y;
+        startY = y - CENTER_Y;
     }
 
     public int getY() {
-        return startY - CENTER_Y;
+        return startY;
     }
 
     public int getX() {
-        return startX - CENTER_X;
+        return startX;
     }
 
     private int getRandomOrientation() {
@@ -72,31 +83,31 @@ public class Tetromino {
         return rand.nextInt(getOrientations().length);
     }
 
-    private int[][][] getOrientations() {
+    public int[][][] getOrientations() {
         switch (type) {
             case I:
-                return Orientations.I;
+                return Orientation.I;
 
             case J:
-                return Orientations.J;
+                return Orientation.J;
 
             case L:
-                return Orientations.L;
+                return Orientation.L;
 
             case O:
-                return Orientations.O;
+                return Orientation.O;
 
             case S:
-                return Orientations.S;
+                return Orientation.S;
 
             case T:
-                return Orientations.T;
+                return Orientation.T;
 
             case Z:
-                return Orientations.Z;
+                return Orientation.Z;
 
             default:
-                return Orientations.I;
+                return Orientation.I;
         }
     }
 
