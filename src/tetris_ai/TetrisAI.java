@@ -78,7 +78,7 @@ public class TetrisAI {
                 tetromino.setCenterY(Tetromino.START_Y);
                 tetromino.setCenterX(Tetromino.START_X);
 
-                for (int x = 0; x < TetrisView.GRID_WIDTH; x++) {
+                for (int x = 0; x < Grid.WIDTH; x++) {
                     int numRotations = Math.abs(tetromino.getOrientationIndex() - index);
                     tetromino.setOrientationIndex(index);
 
@@ -90,8 +90,8 @@ public class TetrisAI {
                     }
 
                     int y = tetromino.getCenterY();
-                    if (TetrisView.isLegal(tetromino, newState, new int[]{0, 0})) {
-                        TetrisView.dropPiece(tetromino, newState);
+                    if (Grid.isLegalMove(tetromino, newState, new int[]{0, 0})) {
+                        Grid.dropPiece(tetromino, newState);
                     }
                     int dy = tetromino.getCenterY() - y;
 
@@ -106,24 +106,28 @@ public class TetrisAI {
             return successors;
         }
 
+        public void addMove(Move move) {
+            moves.add(move);
+        }
+
         public void addHorizontalMoves(int dx) {
             for (int lx = 0; lx > dx ; lx--) {
-                moves.add(Move.LEFT);
+                addMove(Move.LEFT);
             }
             for (int rx = 0; rx < dx; rx++) {
-                moves.add(Move.RIGHT);
+                addMove(Move.RIGHT);
             }
         }
 
         public void addVerticalMoves(int dy) {
             for (int i = 0; i < dy; i++) {
-                moves.add(Move.DOWN);
+                addMove(Move.DOWN);
             }
         }
 
         public void addRotations(int n) {
             for (int r = 0; r < n; r++) {
-                moves.add(Move.ROTATE);
+                addMove(Move.ROTATE);
             }
         }
 

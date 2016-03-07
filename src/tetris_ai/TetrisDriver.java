@@ -81,17 +81,24 @@ public class TetrisDriver extends Application {
         public void handle(ActionEvent event) {
             if (tetrisView.gameOver()) {
                 statistics.showEndgameMessage();
-            } else if (!tetrisView.isLegal(currentPiece, Move.DOWN.getValues())) {
+            } else if (!Grid.isLegalMove(currentPiece, tetrisView.getOccupiedGrid(), Move.DOWN.getValues())) {
                 tetrisView.placePiece(currentPiece);
                 int lines = tetrisView.clearLines();
                 statistics.update(lines);
                 currentPiece = new Tetromino();
-                currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(),
-                        new Tetromino(currentPiece.getType(), currentPiece.getOrientationIndex()));
+                try {
+                    currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece.clone());
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                }
             } else {
                 if (aiMode && currentMoves != null && !currentMoves.isEmpty()) {
                     Move nextMove = currentMoves.remove();
-                    tetrisView.doMove(currentPiece, nextMove.getValues());
+                    if (nextMove == Move.ROTATE) {
+                        tetrisView.rotatePiece(currentPiece);
+                    } else {
+                        tetrisView.doMove(currentPiece, nextMove.getValues());
+                    }
                 }
                 tetrisView.doMove(currentPiece, Move.DOWN.getValues());
             }

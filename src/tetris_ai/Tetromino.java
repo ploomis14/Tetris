@@ -7,7 +7,7 @@ import java.util.Random;
 /**
  * @author Peter Loomis
  */
-public class Tetromino {
+public class Tetromino implements Cloneable {
 
     public static final int WIDTH = 4;
     public static final int HEIGHT = 4;
@@ -48,6 +48,10 @@ public class Tetromino {
         this.orientationIndex = orientation;
         startX = START_X;
         startY = START_Y;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Type getType() {
@@ -154,5 +158,13 @@ public class Tetromino {
             default:
                 return Color.BLACK;
         }
+    }
+
+    @Override
+    protected Tetromino clone() throws CloneNotSupportedException {
+        Tetromino copy = (Tetromino) super.clone();
+        copy.setType(type);
+        copy.setOrientationIndex(orientationIndex);
+        return copy;
     }
 }
