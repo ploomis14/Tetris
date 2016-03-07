@@ -2,10 +2,7 @@ package tetris_ai;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-
-import java.util.List;
 
 /**
  * @author Peter Loomis
@@ -34,16 +31,28 @@ public class TetrisView extends Group {
         }
     }
 
-    public void clearLines() {
+    public int clearLines() {
+        int linesCleared = 0;
         int r = GRID_HEIGHT - 1;
         while (r > 0) {
             if (fullRow(r)) {
+                linesCleared++;
                 clearRow(r);
                 dropPiecesAboveRow(r);
             } else {
                 r--;
             }
         }
+        return linesCleared;
+    }
+
+    public boolean gameOver() {
+        for (int c = 0; c < GRID_WIDTH; c++) {
+            if (occupied[1][c] == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean fullRow(int row) {
