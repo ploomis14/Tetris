@@ -16,7 +16,7 @@ public class TetrisAI extends Chromosome {
     }
 
     public Queue<Move> getMoveSequence(int[][] startState, Tetromino tetromino) {
-        TetrisNode node = greedySearch(new TetrisNode(tetromino, startState, 0));
+        TetrisNode node = greedySearch(new TetrisNode(tetromino, startState));
         return node.getMoves();
     }
 
@@ -39,7 +39,7 @@ public class TetrisAI extends Chromosome {
         double score = 0;
         int i = 0;
         int[][] currentState = new int[Grid.HEIGHT][Grid.WIDTH];
-        TetrisNode current = new TetrisNode(new Tetromino(), currentState, 0);
+        TetrisNode current = new TetrisNode(new Tetromino(), currentState);
 
         while (i < MAX_ITERATIONS) {
             if (Grid.gameOver(currentState)) return Double.MIN_VALUE;
@@ -54,8 +54,6 @@ public class TetrisAI extends Chromosome {
     }
 
     private class TetrisNode {
-
-        private int depth;
 
         private double score;
 
@@ -75,10 +73,9 @@ public class TetrisAI extends Chromosome {
          */
         private Tetromino tetromino;
 
-        public TetrisNode(Tetromino tetromino, int[][] state, int depth) {
+        public TetrisNode(Tetromino tetromino, int[][] state) {
             this.state = state;
             this.tetromino = tetromino;
-            this.depth = depth;
             this.score = computeScore();
             this.moves = new LinkedList<>();
         }
@@ -111,7 +108,7 @@ public class TetrisAI extends Chromosome {
                             int rotations = Math.abs(newPiece.getOrientationIndex() - tetromino.getOrientationIndex());
 
                             for (Tetromino.Type type : Tetromino.Type.values()) {
-                                TetrisNode successor = new TetrisNode(new Tetromino(type), newState, depth + 1);
+                                TetrisNode successor = new TetrisNode(new Tetromino(type), newState);
                                 successor.addRotations(rotations);
                                 successor.addHorizontalMoves(dx);
                                 successor.addVerticalMoves(dy);
