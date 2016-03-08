@@ -5,7 +5,7 @@ package tetris_ai;
  */
 public final class Grid {
 
-    public static final int WIDTH = 10;
+    public static final int WIDTH = 8;
     public static final int HEIGHT = 21;
 
     public static void placePiece(Tetromino piece, int[][] state) {
@@ -90,5 +90,35 @@ public final class Grid {
             if (complete) l++;
         }
         return l;
+    }
+
+    public static boolean fullRow(int row, int[][] state) {
+        for (int col = 0; col < Grid.WIDTH; col++) {
+            if (state[row][col] == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void clearRow(int r, int[][] state) {
+        for (int c = 0; c < Grid.WIDTH; c++) {
+            state[r][c] = 0;
+        }
+    }
+
+    public static void dropPiecesAboveRow(int row, int[][] state) {
+        for (int r = row; r > 0; r--) {
+            System.arraycopy(state[r - 1], 0, state[r], 0, Grid.WIDTH);
+        }
+    }
+
+    public static boolean gameOver(int[][] state) {
+        for (int c = 0; c < Grid.WIDTH; c++) {
+            if (state[0][c] == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 }

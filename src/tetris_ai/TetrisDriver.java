@@ -14,11 +14,13 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Queue;
+import java.util.Scanner;
 
 public class TetrisDriver extends Application {
 
-    private static final int PIECE_PREDICTION = 1;
     private static final double GAME_SPEED = 0.75;
     private static final boolean AI_MODE = true;
 
@@ -28,11 +30,30 @@ public class TetrisDriver extends Application {
     private TetrisAI ai;
     private Queue<Move> currentMoves;
 
+    public static double[] readWeightsFromFile(String filename) {
+        File weightFile = new File(filename);
+        double[] weights = new double[Feature.values().length];
+        try {
+            Scanner scanner = new Scanner(weightFile);
+            System.out.println("Weights:");
+            int i = 0;
+            while (scanner.hasNextDouble()) {
+                double w = scanner.nextDouble();
+                System.out.println(Feature.values()[i] + " weight: " + w);
+                weights[i] = w;
+                i++;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return weights;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         tetrisView = new TetrisView();
         currentPiece = new Tetromino();
-        ai = new TetrisAI(PIECE_PREDICTION);
+        ai = new TetrisAI(readWeightsFromFile("weights"));
         if (AI_MODE) {
             currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece);
         }

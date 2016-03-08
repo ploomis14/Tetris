@@ -37,7 +37,7 @@ public class TetrisView extends Group {
         int linesCleared = 0;
         int r = Grid.HEIGHT - 1;
         while (r > 0) {
-            if (fullRow(r)) {
+            if (Grid.fullRow(r, occupied)) {
                 linesCleared++;
                 clearRow(r);
                 dropPiecesAboveRow(r);
@@ -49,35 +49,21 @@ public class TetrisView extends Group {
     }
 
     public boolean gameOver() {
-        for (int c = 0; c < Grid.WIDTH; c++) {
-            if (occupied[0][c] == 1) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean fullRow(int row) {
-        for (int col = 0; col < Grid.WIDTH; col++) {
-            if (occupied[row][col] == 0) {
-                return false;
-            }
-        }
-        return true;
+        return Grid.gameOver(occupied);
     }
 
     private void clearRow(int r) {
+        Grid.clearRow(r, occupied);
         for (int c = 0; c < Grid.WIDTH; c++) {
-            occupied[r][c] = 0;
             tiles[r][c].setFill(Color.LIGHTGRAY);
         }
     }
 
     private void dropPiecesAboveRow(int row) {
+        Grid.dropPiecesAboveRow(row, occupied);
         for (int r = row; r > 0; r--) {
             for (int c = 0; c < Grid.WIDTH; c++) {
                 tiles[r][c].setFill(tiles[r - 1][c].getFill());
-                occupied[r][c] = occupied[r - 1][c];
             }
         }
     }

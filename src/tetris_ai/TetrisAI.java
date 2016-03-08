@@ -7,12 +7,12 @@ import java.util.Queue;
 /**
  * @author Peter Loomis
  */
-public class TetrisAI {
+public class TetrisAI implements Chromosome {
 
-    private int lookAhead;
+    private double[] weights;
 
-    public TetrisAI(int lookAhead) {
-        this.lookAhead = lookAhead;
+    public TetrisAI(double[] weights) {
+        this.weights = weights;
     }
 
     public Queue<Move> getMoveSequence(int[][] startState, Tetromino tetromino) {
@@ -33,11 +33,29 @@ public class TetrisAI {
         return localMax;
     }
 
+    @Override
+    public double[] getWeights() {
+        return weights;
+    }
 
+    @Override
+    public double getFitness() {
+        // play the game until end, return the final score
+        double score = 0;
+        int[][] currentState = new int[Grid.HEIGHT][Grid.WIDTH];
+        TetrisNode current = new TetrisNode(new Tetromino(), currentState, 0);
+
+        while (!Grid.gameOver(currentState)) {
+            current = greedySearch(current);
+            currentState = current.getState();
+
+            int lines = Grid.getCompleteLines(currentState);
+            score += Statistics.getLineScore(lines);
+        }
+        return score;
+    }
 
     private class TetrisNode {
-
-        private TetrisNode parent;
 
         private int depth;
 
@@ -148,15 +166,13 @@ public class TetrisAI {
             int holes = Grid.getHoles(state);
             int lines = Grid.getCompleteLines(state);
 
-            return lines - holes - height;
+            return (weights[Feature.LINES.getValue()] * lines)
+                    + (weights[Feature.HOLES.getValue()] * holes)
+                    + (weights[Feature.HEIGHT.getValue()] * height);
         }
 
-        public void setParent(TetrisNode p) {
-            this.parent = p;
-        }
-
-        public TetrisNode getParent() {
-            return parent;
+        public int[][] getState() {
+            return state;
         }
     }
 }

@@ -53,25 +53,25 @@ public class Statistics extends VBox {
 
     public void update(int linesCleared) {
         updateLines(linesCleared);
+        updateScore(getLineScore(linesCleared));
+    }
+
+    public static int getLineScore(int linesCleared) {
         switch (linesCleared) {
             case 1:
-                updateScore(LINE_SCORE_1);
-                break;
+                return LINE_SCORE_1;
 
             case 2:
-                updateScore(LINE_SCORE_2);
-                break;
+                return LINE_SCORE_2;
 
             case 3:
-                updateScore(LINE_SCORE_3);
-                break;
+                return LINE_SCORE_3;
 
             case 4:
-                updateScore(LINE_SCORE_4);
-                break;
+                return LINE_SCORE_4;
 
             default:
-                break;
+                return 0;
         }
     }
 
