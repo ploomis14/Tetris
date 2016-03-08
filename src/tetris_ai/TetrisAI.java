@@ -33,6 +33,8 @@ public class TetrisAI {
         return localMax;
     }
 
+
+
     private class TetrisNode {
 
         private TetrisNode parent;

@@ -20,6 +20,7 @@ public class TetrisDriver extends Application {
 
     private static final int PIECE_PREDICTION = 1;
     private static final double GAME_SPEED = 0.75;
+    private static final boolean AI_MODE = true;
 
     private TetrisView tetrisView;
     private Statistics statistics;
@@ -27,14 +28,12 @@ public class TetrisDriver extends Application {
     private TetrisAI ai;
     private Queue<Move> currentMoves;
 
-    private boolean aiMode = true;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         tetrisView = new TetrisView();
         currentPiece = new Tetromino();
         ai = new TetrisAI(PIECE_PREDICTION);
-        if (aiMode) {
+        if (AI_MODE) {
             currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece);
         }
         tetrisView.addPiece(currentPiece);
@@ -52,7 +51,7 @@ public class TetrisDriver extends Application {
 
         // event listeners for manual commands
         scene.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
-            if (!aiMode) {
+            if (!AI_MODE) {
                 if (key.getCode() == KeyCode.RIGHT) {
                     tetrisView.doMove(currentPiece, Move.RIGHT.getValues());
                 } else if (key.getCode() == KeyCode.LEFT) {
@@ -89,7 +88,7 @@ public class TetrisDriver extends Application {
                 int lines = tetrisView.clearLines();
                 statistics.update(lines);
                 currentPiece = new Tetromino();
-                if (aiMode) {
+                if (AI_MODE) {
                     try {
                         currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece.clone());
                     } catch (CloneNotSupportedException e) {
@@ -97,7 +96,7 @@ public class TetrisDriver extends Application {
                     }
                 }
             } else {
-                if (aiMode && currentMoves != null && !currentMoves.isEmpty()) {
+                if (AI_MODE && currentMoves != null && !currentMoves.isEmpty()) {
                     Move nextMove = currentMoves.remove();
                     if (nextMove == Move.ROTATE) {
                         tetrisView.rotatePiece(currentPiece);

@@ -63,10 +63,18 @@ public final class Grid {
         int holes = 0;
         for (int r = 1; r < HEIGHT; r++) {
             for (int c = 0; c < WIDTH; c++) {
-                if (state[r][c] == 0 && state[r - 1][c] == 1) holes++;
+                if (isHole(r, c, state)) holes++;
             }
         }
         return holes;
+    }
+
+    private static boolean isHole(int r, int c, int[][] state) {
+        if (state[r][c] != 0) return false;
+        for (int row = r - 1; row >= 0 ; row--) {
+            if (state[row][c] == 1) return true;
+        }
+        return false;
     }
 
     public static int getCompleteLines(int[][] state) {
