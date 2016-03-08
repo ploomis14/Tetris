@@ -53,8 +53,8 @@ public class TetrisDriver extends Application {
     public void start(Stage primaryStage) throws Exception {
         tetrisView = new TetrisView();
         currentPiece = new Tetromino();
-        ai = new TetrisAI(readWeightsFromFile("weights"));
         if (AI_MODE) {
+            ai = new TetrisAI(readWeightsFromFile("weights"));
             currentMoves = ai.getMoveSequence(tetrisView.getOccupiedGrid(), currentPiece);
         }
         tetrisView.addPiece(currentPiece);
