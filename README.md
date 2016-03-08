@@ -6,6 +6,7 @@ an AI for Tetris
 - make sure AI_MODE is set to true in TetrisDriver.java
 - run GeneticProblem.java to generate a weights file, which contains a list of feature weights that the AI uses for scoring moves
 - run TetrisDriver.java
+
 ### Running manual mode
 - make sure AI_MODE is set to false in TetrisDriver.java
 - run TetrisDriver.java
