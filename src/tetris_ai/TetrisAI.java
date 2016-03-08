@@ -23,8 +23,7 @@ public class TetrisAI extends Chromosome {
     public TetrisNode greedySearch(TetrisNode startNode) {
         double bestScore = Integer.MIN_VALUE;
         TetrisNode localMax = null;
-        List<TetrisNode> successors = startNode.getSuccessors();
-        for (TetrisNode n : successors) {
+        for (TetrisNode n : startNode.getSuccessors()) {
             if (n.getScore() > bestScore) {
                 bestScore = n.getScore();
                 localMax = n;
@@ -107,13 +106,11 @@ public class TetrisAI extends Chromosome {
                             int dy = newPiece.getCenterY() - tetromino.getCenterY();
                             int rotations = Math.abs(newPiece.getOrientationIndex() - tetromino.getOrientationIndex());
 
-                            for (Tetromino.Type type : Tetromino.Type.values()) {
-                                TetrisNode successor = new TetrisNode(new Tetromino(type), newState);
-                                successor.addRotations(rotations);
-                                successor.addHorizontalMoves(dx);
-                                successor.addVerticalMoves(dy);
-                                successors.add(successor);
-                            }
+                            TetrisNode successor = new TetrisNode(new Tetromino(), newState);
+                            successor.addRotations(rotations);
+                            successor.addHorizontalMoves(dx);
+                            successor.addVerticalMoves(dy);
+                            successors.add(successor);
                         }
                     } catch (CloneNotSupportedException e) {
                         e.printStackTrace();
