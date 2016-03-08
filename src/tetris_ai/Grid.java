@@ -5,7 +5,7 @@ package tetris_ai;
  */
 public final class Grid {
 
-    public static final int WIDTH = 8;
+    public static final int WIDTH = 10;
     public static final int HEIGHT = 21;
 
     public static void placePiece(Tetromino piece, int[][] state) {
@@ -63,7 +63,7 @@ public final class Grid {
         int holes = 0;
         for (int r = 1; r < HEIGHT; r++) {
             for (int c = 0; c < WIDTH; c++) {
-                if (isHole(r, c, state)) holes++;
+                if (isHole(r, c, state)) holes += r;
             }
         }
         return holes;
@@ -80,20 +80,13 @@ public final class Grid {
     public static int getCompleteLines(int[][] state) {
         int l = 0;
         for (int r = 0; r < HEIGHT; r++) {
-            boolean complete = true;
-            for (int c = 0; c < WIDTH; c++) {
-                if (state[r][c] == 0) {
-                    complete = false;
-                    break;
-                }
-            }
-            if (complete) l++;
+            if (fullRow(r, state)) l++;
         }
         return l;
     }
 
     public static boolean fullRow(int row, int[][] state) {
-        for (int col = 0; col < Grid.WIDTH; col++) {
+        for (int col = 0; col < WIDTH; col++) {
             if (state[row][col] == 0) {
                 return false;
             }
@@ -102,23 +95,59 @@ public final class Grid {
     }
 
     public static void clearRow(int r, int[][] state) {
-        for (int c = 0; c < Grid.WIDTH; c++) {
+        for (int c = 0; c < WIDTH; c++) {
             state[r][c] = 0;
         }
     }
 
     public static void dropPiecesAboveRow(int row, int[][] state) {
         for (int r = row; r > 0; r--) {
-            System.arraycopy(state[r - 1], 0, state[r], 0, Grid.WIDTH);
+            System.arraycopy(state[r - 1], 0, state[r], 0, WIDTH);
         }
     }
 
     public static boolean gameOver(int[][] state) {
-        for (int c = 0; c < Grid.WIDTH; c++) {
+        for (int c = 0; c < WIDTH; c++) {
             if (state[0][c] == 1) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static int getAltitudeDelta(int[][] state) {
+        int highestColumn = 0;
+        int lowestColumn = HEIGHT - 1;
+        for (int c = 0; c < WIDTH; c++) {
+            int h = getColumnHeight(state, c);
+            if (h > lowestColumn) lowestColumn = h;
+            if (h < lowestColumn) lowestColumn = h;
+        }
+        return highestColumn - lowestColumn;
+    }
+
+    public static int clearLines(int[][] state) {
+        int linesCleared = 0;
+        int r = Grid.HEIGHT - 1;
+        while (r > 0) {
+            if (Grid.fullRow(r, state)) {
+                linesCleared++;
+                clearRow(r, state);
+                dropPiecesAboveRow(r, state);
+            } else {
+                r--;
+            }
+        }
+        return linesCleared;
+    }
+
+    public static int getRoughness(int[][] state) {
+        int roughness = 0;
+        for (int r = 0; r < HEIGHT; r++) {
+            for (int c = 0; c < WIDTH - 1; c++) {
+                if (state[r][c] != state[r][c + 1]) roughness++;
+            }
+        }
+        return roughness;
     }
 }

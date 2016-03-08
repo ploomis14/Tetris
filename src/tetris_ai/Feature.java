@@ -6,7 +6,9 @@ package tetris_ai;
 public enum Feature {
     HEIGHT(0),
     HOLES(1),
-    LINES(2);
+    LINES(2),
+    V_DELTA(3),
+    ROUGHNESS(4);
 
     private int value;
 

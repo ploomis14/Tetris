@@ -3,9 +3,29 @@ package tetris_ai;
 /**
  * @author Peter Loomis
  */
-public interface Chromosome {
+public abstract class Chromosome implements Comparable<Chromosome> {
 
-    public double[] getWeights();
+    protected double fitness;
 
-    public double getFitness();
+    protected double[] weights;
+
+    public Chromosome(double[] weights) {
+        this.weights = weights;
+        this.fitness = evaluate();
+    }
+
+    protected abstract double evaluate();
+
+    public double[] getWeights() {
+        return weights;
+    }
+
+    public double getFitness() {
+        return fitness;
+    }
+
+    @Override
+    public int compareTo(Chromosome o) {
+        return o.getFitness() > this.fitness ? 1 : (o.getFitness() < this.fitness ? - 1 : 0);
+    }
 }

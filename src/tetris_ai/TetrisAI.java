@@ -7,12 +7,12 @@ import java.util.Queue;
 /**
  * @author Peter Loomis
  */
-public class TetrisAI implements Chromosome {
+public class TetrisAI extends Chromosome {
 
-    private double[] weights;
+    private static final int MAX_ITERATIONS = 20;
 
     public TetrisAI(double[] weights) {
-        this.weights = weights;
+        super(weights);
     }
 
     public Queue<Move> getMoveSequence(int[][] startState, Tetromino tetromino) {
@@ -34,23 +34,21 @@ public class TetrisAI implements Chromosome {
     }
 
     @Override
-    public double[] getWeights() {
-        return weights;
-    }
-
-    @Override
-    public double getFitness() {
+    protected double evaluate() {
         // play the game until end, return the final score
         double score = 0;
+        int i = 0;
         int[][] currentState = new int[Grid.HEIGHT][Grid.WIDTH];
         TetrisNode current = new TetrisNode(new Tetromino(), currentState, 0);
 
-        while (!Grid.gameOver(currentState)) {
+        while (i < MAX_ITERATIONS) {
+            if (Grid.gameOver(currentState)) return Double.MIN_VALUE;
             current = greedySearch(current);
+            if (current == null) break;
             currentState = current.getState();
-
-            int lines = Grid.getCompleteLines(currentState);
+            int lines = Grid.clearLines(currentState);
             score += Statistics.getLineScore(lines);
+            i++;
         }
         return score;
     }
@@ -165,10 +163,14 @@ public class TetrisAI implements Chromosome {
             int height = Grid.getHeight(state);
             int holes = Grid.getHoles(state);
             int lines = Grid.getCompleteLines(state);
+            int altitudeDelta = Grid.getAltitudeDelta(state);
+            int roughness = Grid.getRoughness(state);
 
             return (weights[Feature.LINES.getValue()] * lines)
                     + (weights[Feature.HOLES.getValue()] * holes)
-                    + (weights[Feature.HEIGHT.getValue()] * height);
+                    + (weights[Feature.HEIGHT.getValue()] * height)
+                    + (weights[Feature.V_DELTA.getValue()] * altitudeDelta)
+                    + (weights[Feature.ROUGHNESS.getValue()] * roughness);
         }
 
         public int[][] getState() {
